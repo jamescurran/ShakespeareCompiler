@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>NConsoler</id>
+    <version>2.0.0.0</version>
+    <title>NConsoler</title>
+    <authors>csharpus</authors>
+    <owners>csharpus</owners>
+    <projectUrl>http://nconsoler.csharpus.com/</projectUrl>
+    <iconUrl>https://nugetgallery.blob.core.windows.net/icons/NConsoler.2.0.0.0.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Small library for parsing command line arguments in .net applications in extremely easy way, which can be even embedded to your application as source code (all the source code is in the one file). Using it is as simple as writing a method.</description>
+    <summary>NConsoler is an open source library for building .Net console applications</summary>
+    <releaseNotes />
+    <copyright />
+    <language />
+  </metadata>
+</package>
