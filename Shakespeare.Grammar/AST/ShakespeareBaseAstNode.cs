@@ -13,10 +13,12 @@ namespace Shakespeare.AST
     {
         protected ContextData Context { get; set; }
         protected ParseTreeNode TreeNode { get; set; }
+        protected AstContext AstContext { get; private set; }
         public override void Init(AstContext context, ParseTreeNode treeNode)
         {
             const string KeyName = "ShakespeareContext";
             base.Init(context, treeNode);
+            AstContext = context;
             TreeNode = treeNode;
             object data;
             if (context.Values.TryGetValue(KeyName, out data))
