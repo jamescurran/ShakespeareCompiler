@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AST\CharacterListNode.cs" />
     <Compile Include="AST\CharacterNode.cs" />
     <Compile Include="AST\ShakespeareBaseAstNode.cs" />
     <Compile Include="CompilerLoader.cs" />

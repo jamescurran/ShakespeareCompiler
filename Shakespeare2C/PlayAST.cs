@@ -1,15 +1,10 @@
 ﻿using Irony.Ast;
 using Irony.Interpreter;
-using Irony.Interpreter.Ast;
 using Irony.Parsing;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-
 using Shakespeare.Text;
 using Shakespeare.Utility;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Shakespeare.Ast
 {
@@ -81,36 +76,6 @@ namespace Shakespeare.Ast
         {
             base.Init(context, treeNode);
             Characters = treeNode.ChildNodes.Select(cn => cn.AstNode as CharacterDeclarationNode).ToList();
-        }
-    }
-
-    public class CharacterListNode : ShakespeareBaseAstNode
-    {
-        public override void Init(AstContext context, ParseTreeNode treeNode)
-        {
-            base.Init(context, treeNode);
-            //if (treeNode.ChildNodes.Count > 2)
-            //    context.AddMessage(Irony.ErrorLevel.Error, Location, "Too Many Characters in scene.");
-            //else if (Exist1 && !Context.Characters.Any(bnf=> bnf.Name == String1))
-            //        context.AddMessage(Irony.ErrorLevel.Error, Location, @"Character ""{0}"" was not listed in the character list", String1);
-            //else if (Exist2 && !Context.Characters.Any(bnf=> bnf.Name == String2))
-            //        context.AddMessage(Irony.ErrorLevel.Error, Location, @"Character ""{0}"" was not listed in the character list", String2);
-            //else
-            //{
-            //    if (Exist1)
-            //        Context.ActiveCharacter1 = String1;
-            //    if (Exist2)
-            //        Context.ActiveCharacter2 = String2;
-
-            //}
-        }
-        public void Fill(ICollection<CharacterNode> coll)
-        {
-            foreach (CharacterNode cn in ChildNodes)
-            {
-                if (cn != null)
-                    coll.Add(cn);
-            }
         }
     }
 

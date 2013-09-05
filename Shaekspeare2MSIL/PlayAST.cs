@@ -1,26 +1,14 @@
-﻿using Irony.Ast;
-using Irony.Interpreter.Ast;
-using Irony.Parsing;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-
-using System.Reflection.Emit;
-
+using Irony.Ast;
+using Irony.Interpreter;
+using Irony.Parsing;
 using Shakespeare.Utility;
 using TriAxis.RunSharp;
-using Irony.Interpreter;
 
 namespace Shakespeare.Ast
 {
-    internal static class Constant
-    {
-        public static readonly int COMMENT_COLUMN = 40;
-    }
-
-
     internal class RunSharpContext
     {
         public const string Key = "AssemblyGen";
@@ -127,18 +115,6 @@ namespace Shakespeare.Ast
         {
             base.Init(context, treeNode);
             Characters = treeNode.ChildNodes.Select(cn => cn.AstNode as CharacterDeclarationNode).ToList();
-        }
-    }
-
-    public class CharacterListNode : ShakespeareBaseAstNode
-    {
-        public void Fill(ICollection<CharacterNode> coll)
-        {
-            foreach (var cn in TreeNode.ChildNodes)
-            {
-                if (cn != null)
-                    coll.Add(cn.AstNode as CharacterNode);
-            }
         }
     }
 
