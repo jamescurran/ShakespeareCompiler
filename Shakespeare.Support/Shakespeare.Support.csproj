@@ -37,8 +37,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Character.cs" />
-    <Compile Include="IKeySearchable.cs" />
+    <Compile Include="Dramaturge.cs" />
+    <Compile Include="Utilities\IKeySearchable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\RuntimeException.cs" />
+    <Compile Include="Utilities\Utility.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -31,7 +31,7 @@ namespace Shakespeare2MSIL
 
             var scDict = thread.CurrentScope.AsDictionary();
             var rs = new RunSharpContext();
-            rs.AG = new AssemblyGen(outPathname, true);
+            rs.AG = new AssemblyGen(outPathname, param.Debug);
             scDict.Add(RunSharpContext.Key, rs);
 
         }

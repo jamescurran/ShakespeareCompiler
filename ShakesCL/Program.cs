@@ -30,9 +30,14 @@ namespace ShakesCL
             [Required(Description="path to Shakespeare source code to compile")]
             string filename,
             [Optional("C","c", Description="Code generator to use ('C' for C code, 'CS' for C#, 'I' for MSIL")]
-            string compiler
+            string compiler,
+            [Optional(true, Description="Include Debug information in MSIL")]
+            bool debug
             )
         {
+            Console.WriteLine("ShakesCL - Command-line compiler interface for Shakespeare programming lanaguage");
+            Console.WriteLine("Copyright 2013, James M. Curran, Novel Theory Software");
+
             var comp = CompilerLoader.Load(compiler);
             var grammar = new ShakespeareGrammar(comp);
             var parser = new Parser(grammar);
@@ -44,7 +49,8 @@ namespace ShakesCL
             var param = new CompilerParams()
             {
                 OutFolder = @"C:\Users\User\Projects\Shakespeare\Executables\Debug\",
-                SrcFileName = filename
+                SrcFileName = filename,
+                Debug = debug
             };
 
             comp.PrepareScope(thread, param);

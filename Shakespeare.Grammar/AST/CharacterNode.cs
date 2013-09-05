@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Shakespeare.Utility;
+using Irony.Ast;
+using Irony.Parsing;
 
 namespace Shakespeare.Ast
 {
@@ -35,5 +37,29 @@ namespace Shakespeare.Ast
             return GetHashCode(this);
         }
     }
+
+    /// <summary>
+    /// These can probably be merged
+    /// </summary>
+    public class AsValueNode : ShakespeareBaseAstNode
+    {
+        public string Value { get; set; }
+        public override void Init(AstContext context, ParseTreeNode treeNode)
+        {
+            base.Init(context, treeNode);
+            var tok = this.TreeNode.Token ?? this.Child1.Token;
+            Value = tok.ValueString;
+
+        }
+        protected override object ReallyDoEvaluate(Irony.Interpreter.ScriptThread thread)
+        {
+            return Value;
+        }
+        public override string ToString()
+        {
+            return Value;
+        }
+    }
+
 
 }

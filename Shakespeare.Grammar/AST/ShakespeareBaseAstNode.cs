@@ -79,25 +79,6 @@ namespace Shakespeare.Ast
             return null;
         }
 
-        public virtual ShakespeareBaseAstNode OutputTo(TextWriter tw)
-        {
-            var tok = TreeNode.Token;
-            if (TreeNode.Term != null)
-                tw.Write(TreeNode.Term.Name);
-            else if (TreeNode.Token != null)
-                tw.Write(TreeNode.Token.Text);
-
-            return this;
-        }
-
-        public override string ToString()
-        {
-            using (var sw = new StringWriter())
-            {
-                OutputTo(sw);
-                return sw.ToString();
-            }
-        }
         protected override object DoEvaluate(Irony.Interpreter.ScriptThread thread)
         {
             base.DoEvaluate(thread);

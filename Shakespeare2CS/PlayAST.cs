@@ -34,7 +34,7 @@ namespace Shakespeare.Ast
             sw.WriteLine("\tclass Program");
             sw.WriteLine("\t{");
             sw.WriteLine("\t\tstatic void Main(string[] args)");
-            sw.WriteLine("\t\t\t{");
+            sw.WriteLine("\t\t{");
             sw.WriteLine("\t\t\tvar script = new Script();");
             sw.WriteLine("\t\t\tscript.Action();");
             sw.WriteLine("\t\t}");

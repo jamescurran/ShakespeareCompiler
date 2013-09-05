@@ -10,5 +10,6 @@ namespace Shakespeare
         public string SrcFileName { get; set; }
         public string OutFileName { get; set; }
         public string OutFolder { get; set; }
+        public bool Debug { get; set; }
     }
 }

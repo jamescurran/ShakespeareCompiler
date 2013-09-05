@@ -15,7 +15,6 @@ namespace Shakespeare
         AstNodeCreator BinaryOperatorNode { get; }
         AstNodeCreator CharacterDeclarationListNode { get; }
         AstNodeCreator CharacterDeclarationNode  { get; }
-        AstNodeCreator CharacterListNode  { get; }
         AstNodeCreator CommentNode  { get; }
         AstNodeCreator ComparativeNode  { get; }
         AstNodeCreator ComparisonNode  { get; }

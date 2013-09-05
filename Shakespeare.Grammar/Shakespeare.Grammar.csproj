@@ -49,11 +49,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AST\RomanNumberNode.cs" />
     <Compile Include="AST\CharacterListNode.cs" />
     <Compile Include="AST\CharacterNode.cs" />
+    <Compile Include="AST\ListNode.cs" />
+    <Compile Include="AST\MultiWordTermialNode.cs" />
+    <Compile Include="AST\SelfNode.cs" />
     <Compile Include="AST\ShakespeareBaseAstNode.cs" />
-    <Compile Include="CompilerLoader.cs" />
-    <Compile Include="CompilerParams.cs" />
+    <Compile Include="AST\TwoPartNode.cs" />
+    <Compile Include="Compiler\Compiler.cs" />
+    <Compile Include="Compiler\CompilerLoader.cs" />
+    <Compile Include="Compiler\CompilerParams.cs" />
     <Compile Include="ContextData.cs" />
     <Compile Include="AST\MakerClasses.cs" />
     <Compile Include="IHasPrepareScope.cs" />

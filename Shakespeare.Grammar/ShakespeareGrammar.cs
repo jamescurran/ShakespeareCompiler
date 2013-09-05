@@ -17,15 +17,9 @@ namespace Shakespeare
     [Language("Shakespeare", "1.0.*", "A programming language created with the design goal to make the source code resemble Shakespeare plays.")]
     public class ShakespeareGrammar : InterpretedLanguageGrammar
     {
-        IShakespeareCompiler compiler;
-        public ShakespeareGrammar() : this(CompilerLoader.Load("CS"))
-        {
-        }
-
         public ShakespeareGrammar(IShakespeareCompiler compiler)
             : base(false)
         {
-            this.compiler = compiler;
             string[] endSymbols = { ".", "?", "!" };
             KeyTerm COLON = ToTerm(":", "colon");
             KeyTerm COMMA = ToTerm(",");
@@ -103,7 +97,7 @@ namespace Shakespeare
             var BinaryOperator = new NonTerminal("BinaryOperator", compiler.BinaryOperatorNode);
             var CharacterDeclaration = new NonTerminal("CharacterDeclaration", compiler.CharacterDeclarationNode);
             var CharacterDeclarationList = new NonTerminal("CharacterDeclarationList", compiler.CharacterDeclarationListNode);
-            var CharacterList = new NonTerminal("CharacterList", compiler.CharacterListNode);
+            var CharacterList = new NonTerminal("CharacterList", typeof(CharacterListNode));
             var Comment = new FreeTextLiteral("Comment", FreeTextOptions.ConsumeTerminator, endSymbols);
             var Comparative = new NonTerminal("Comparative", compiler.ComparativeNode);
             var Comparison = new NonTerminal("Comparison", compiler.ComparisonNode);
@@ -274,7 +268,7 @@ namespace Shakespeare
             this.Root = Play;
             Text.AstConfig = SetNode<AstNode>();
             Comment.AstConfig = SetNode(compiler.CommentNode);
-            RomanNumber.AstConfig = SetNode<AsTokenNode>();
+            RomanNumber.AstConfig = SetNode<RomanNumberNode>();
             Character.AstConfig = SetNode<CharacterNode>();
 
             MarkTransient(SceneStuff,ActRoman, SceneRoman,
@@ -293,15 +287,11 @@ namespace Shakespeare
         {
             const string resourcePrefix = "Shakespeare.include.";
             var termList = new NonTerminal(name, typeof(TNode));
-#if false
-            var pathname = Path.Combine(include_path, filename);
-            var lines = File.ReadAllLines(pathname);
-#else
             var strm = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePrefix + filename.ToLowerInvariant());
             var sw = new StreamReader(strm);
             var block = sw.ReadToEnd();
             var lines = block.Split('\n', '\r');
-#endif
+
             if (lines.Any())
             {
                 BnfExpression expr = new BnfExpression(MultiWordTermial(lines[0]));
@@ -333,7 +323,6 @@ namespace Shakespeare
         }
 
         AstNodeConfig SetNode(AstNodeCreator creator)
-//            where TNode : AstNode, new()
         {
             return new AstNodeConfig() { NodeCreator = creator };
         }
