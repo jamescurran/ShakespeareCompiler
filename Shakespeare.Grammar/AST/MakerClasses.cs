@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Shakespeare.AST
+namespace Shakespeare.Ast
 {
 
     public class SelfNode : ShakespeareBaseAstNode
@@ -17,6 +17,10 @@ namespace Shakespeare.AST
             AsString = Term.Name;
         }
 
+        protected override object ReallyDoEvaluate(Irony.Interpreter.ScriptThread thread)
+        {
+            return AstNode1.Evaluate(thread);
+        }
         public override ShakespeareBaseAstNode OutputTo(TextWriter tw)
         {
             return AstNode1.OutputTo(tw);
@@ -25,6 +29,14 @@ namespace Shakespeare.AST
 
     public class ListNode : ShakespeareBaseAstNode
     {
+        protected override object ReallyDoEvaluate(Irony.Interpreter.ScriptThread thread)
+        {
+            foreach (var cn in TreeNode.ChildNodes)
+            {
+                (cn.AstNode as ShakespeareBaseAstNode).Evaluate(thread);
+            }
+            return base.ReallyDoEvaluate(thread);
+        }
         public override ShakespeareBaseAstNode OutputTo(TextWriter tw)
         {
             foreach (var cn in TreeNode.ChildNodes)
@@ -37,9 +49,11 @@ namespace Shakespeare.AST
 
     public class TwoPartNode : ShakespeareBaseAstNode
     {
-        public override void Init(AstContext context, Irony.Parsing.ParseTreeNode treeNode)
+        protected override object ReallyDoEvaluate(Irony.Interpreter.ScriptThread thread)
         {
-            base.Init(context, treeNode);
+            AstNode1.Evaluate(thread);
+            AstNode2.Evaluate(thread);
+            return base.ReallyDoEvaluate(thread);
         }
 
         public override ShakespeareBaseAstNode OutputTo(TextWriter tw)
@@ -51,7 +65,7 @@ namespace Shakespeare.AST
         }
     }
 
-    public class TwoPartWithSpaceNode : ShakespeareBaseAstNode
+    public class TwoPartWithSpaceNode : TwoPartNode
     {
         public override ShakespeareBaseAstNode OutputTo(TextWriter tw)
         {
@@ -74,19 +88,39 @@ namespace Shakespeare.AST
 
     public class AsValueNode : ShakespeareBaseAstNode
     {
+        public string Value { get; set; }
+        public override void Init(AstContext context, ParseTreeNode treeNode)
+        {
+            base.Init(context, treeNode);
+            var tok = this.TreeNode.Token ?? this.Child1.Token;
+            Value = tok.ValueString;
+            
+        }
+        protected override object ReallyDoEvaluate(Irony.Interpreter.ScriptThread thread)
+        {
+            return Value;
+        }
         public override string ToString()
         {
-            var tok = this.TreeNode.Token ?? this.Child1.Token;
-            return tok.ValueString;
+            return Value;
         }
     }
 
     public class AsTokenNode : ShakespeareBaseAstNode
     {
-        public override ShakespeareBaseAstNode OutputTo(TextWriter tw)
+        public string Value { get; set; }
+        public override void Init(AstContext context, ParseTreeNode treeNode)
         {
-            tw.Write(TreeNode.Token.Text);
-            return this;
+            base.Init(context, treeNode);
+            Value = TreeNode.Token.Text;
+        }
+        protected override object ReallyDoEvaluate(Irony.Interpreter.ScriptThread thread)
+        {
+            return Value;
+        }
+        public override string ToString()
+        {
+            return Value;
         }
     }
 
@@ -103,9 +137,11 @@ namespace Shakespeare.AST
 
 
 
-    // Marker class -- this classes have no implementation,
+    // Marker classes -- these classes have no implementation,
     // and are only used for "if (AstNode is ....)" statements
-    
+    public class SceneContentsNode : ListNode { }
+    public class SceneNode : TwoPartNode { }
+    public class ActNode : TwoPartNode { }
     public class AdjectiveNode : SelfNode { }
     public class FirstPersonNode : MultiWordTermialNode { }
     public class FirstPersonReflexiveNode : MultiWordTermialNode { }
@@ -124,10 +160,8 @@ namespace Shakespeare.AST
     public class JumpPhraseBeginninglNode : SelfNode { }
     public class JumpPhraseEndNode : SelfNode { }
     public class JumpPhraseNode : ShakespeareBaseAstNode { }
-
     public class SceneRomanNode : SelfNode { }
     public class SceneStuffNode : ShakespeareBaseAstNode { }
-
     public class StatementSymbolNode : SelfNode { }
 
 

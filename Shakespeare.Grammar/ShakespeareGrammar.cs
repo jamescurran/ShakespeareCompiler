@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Irony.Parsing;
 using System.IO;
-using Shakespeare.AST;
+using Shakespeare.Ast;
 using Irony.Interpreter.Ast;
 using Irony.Ast;
 using Irony.Interpreter;
@@ -18,6 +18,9 @@ namespace Shakespeare
     public class ShakespeareGrammar : InterpretedLanguageGrammar
     {
         IShakespeareCompiler compiler;
+        public ShakespeareGrammar() : this(CompilerLoader.Load("CS"))
+        {
+        }
 
         public ShakespeareGrammar(IShakespeareCompiler compiler)
             : base(false)
@@ -93,7 +96,7 @@ namespace Shakespeare
 
             var Play = new NonTerminal("Play", compiler.PlayNode);
             var Title = new NonTerminal("Title", compiler.TitleNode);
-            var Act = new NonTerminal("Act", compiler.ActNode);
+            var Act = new NonTerminal("Act", typeof(ActNode));
             var ActHeader = new NonTerminal("ActHeader", compiler.ActHeaderNode);
             var ActRoman = new NonTerminal("ActRoman"); 
             var Adjective = new NonTerminal("Adjective", typeof(AdjectiveNode));
@@ -129,9 +132,9 @@ namespace Shakespeare
             var Recall = new NonTerminal("Recall", compiler.RecallNode);
             var Remember = new NonTerminal("Remember", compiler.RememberNode);
             var RomanNumber = new RegexBasedTerminal("RomanNumer", "[mdclxvi]+");
-            var Scene = new NonTerminal("Scene", compiler.SceneNode);
+            var Scene = new NonTerminal("Scene", typeof(SceneNode));
             var Scenes = new NonTerminal("Scenes", typeof(ListNode));
-            var SceneContents = new NonTerminal("SceneContents", compiler.SceneContentsNode);
+            var SceneContents = new NonTerminal("SceneContents", typeof(SceneContentsNode));
             var SceneHeader = new NonTerminal("SceneHeader", compiler.SceneHeaderNode);
             var SceneRoman = new NonTerminal("SceneRoman", typeof(SceneRomanNode));
             var SceneStuff = new NonTerminal("SceneStuff", typeof(SceneStuffNode));
@@ -146,12 +149,10 @@ namespace Shakespeare
             var Value = new NonTerminal("Value", compiler.ValueNode);
             var Acts = new NonTerminal("Acts", typeof(ListNode));
 
-
+            Play.Rule = Title + CharacterDeclarationList + Acts;
 
             Acts.Rule = MakePlusRule(Acts, Act);
             Title.Rule = Text;
-
-
             Act.Rule = ActHeader + Scenes;
 
             Scenes.Rule = MakePlusRule(Scenes, Scene);
@@ -224,8 +225,6 @@ namespace Shakespeare
             NegativeConstant.Rule = NegativeNoun | NegativeAdjective + NegativeConstant | NeutralAdjective + NegativeConstant;
             NonnegatedComparison.Rule = Equality | Inequality;
 
-            Play.Rule = Title + CharacterDeclarationList + Acts;
-
             PositiveComparative.Rule = POSITIVE_COMPARATIVE | MORE + PositiveAdjective | LESS + NegativeAdjective;
             PositiveConstant.Rule = PositiveNoun | PositiveAdjective + PositiveConstant | NeutralAdjective + PositiveConstant;
             PositiveNoun.Rule = NeutralNoun | POSITIVE_NOUN;
@@ -278,7 +277,7 @@ namespace Shakespeare
             RomanNumber.AstConfig = SetNode<AsTokenNode>();
             Character.AstConfig = SetNode<CharacterNode>();
 
-            MarkTransient(SceneStuff,ActRoman,
+            MarkTransient(SceneStuff,ActRoman, SceneRoman,
                 StatementSymbol);
             this.LanguageFlags = LanguageFlags.CreateAst;
 
@@ -301,7 +300,7 @@ namespace Shakespeare
             var strm = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePrefix + filename.ToLowerInvariant());
             var sw = new StreamReader(strm);
             var block = sw.ReadToEnd();
-            var lines = block.Split('\n');
+            var lines = block.Split('\n', '\r');
 #endif
             if (lines.Any())
             {

@@ -13,8 +13,8 @@ namespace Shakespeare.Support
         protected List<Character> OnStage {get; private set;}
         protected Character FirstPerson { get; set; }
         protected Character SecondPerson { get; set; }
-        protected int Comp1;
-        protected int Comp2;
+        protected int Comp1 { get; set; }
+        protected int Comp2 { get; set; }
 
         protected bool TruthFlag { get; set; }
 

@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using Shakespeare.Utility;
 
-namespace Shakespeare.AST
+namespace Shakespeare.Ast
 {
     public class CharacterNode : AsValueNode, IEqualityComparer<CharacterNode>
     {
-        public override string ToString()
+        public override void Init(Irony.Ast.AstContext context, Irony.Parsing.ParseTreeNode treeNode)
         {
-            return base.ToString().str2varname();
+            base.Init(context, treeNode);
+            Value = Value.str2varname();
         }
 
         public bool Equals(CharacterNode x, CharacterNode y)

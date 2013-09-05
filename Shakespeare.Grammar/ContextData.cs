@@ -1,5 +1,5 @@
 ﻿using Irony.Parsing;
-using Shakespeare.AST;
+using Shakespeare.Ast;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,9 +12,6 @@ namespace Shakespeare
     {
         public string CurrentAct { get; set; }
         public string CurrentScene { get; set; }
-        public int NumErrors { get; set; }
-        public int NumWarnings { get; set; }
-        public List<BnfTerm> Characters;
         public List<CharacterNode> ActiveCharacters { get; set; }
         public TextWriter Writer { get; set; }
         public Stream UnderlyingStream { get; set; }

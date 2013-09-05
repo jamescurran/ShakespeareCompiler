@@ -1,4 +1,6 @@
 ﻿using Irony.Ast;
+using Irony.Interpreter;
+using Irony.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +10,8 @@ namespace Shakespeare
 {
     public interface IShakespeareCompiler
     {
+        void PrepareScope(ScriptThread thread, object param);
         AstNodeCreator ActHeaderNode { get; }
-        AstNodeCreator ActNode { get; }
         AstNodeCreator BinaryOperatorNode { get; }
         AstNodeCreator CharacterDeclarationListNode { get; }
         AstNodeCreator CharacterDeclarationNode  { get; }
@@ -35,9 +37,7 @@ namespace Shakespeare
         AstNodeCreator QuestionNode  { get; }
         AstNodeCreator RecallNode  { get; }
         AstNodeCreator RememberNode  { get; }
-        AstNodeCreator SceneContentsNode  { get; }
         AstNodeCreator SceneHeaderNode  { get; }
-        AstNodeCreator SceneNode  { get; }
         AstNodeCreator SentenceNode  { get; }
         AstNodeCreator StatementNode  { get; }
         AstNodeCreator TitleNode  { get; }
@@ -45,4 +45,5 @@ namespace Shakespeare
         AstNodeCreator UnconditionalSentenceNode  { get; }
         AstNodeCreator ValueNode  { get; }
     }
+                                                                   
 }

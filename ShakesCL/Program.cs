@@ -41,6 +41,13 @@ namespace ShakesCL
 
             var app = new ScriptApp(parser.Language);
             var thread = new ScriptThread(app);
+            var param = new CompilerParams()
+            {
+                OutFolder = @"C:\Users\User\Projects\Shakespeare\Executables\Debug\",
+                SrcFileName = filename
+            };
+
+            comp.PrepareScope(thread, param);
             var output = (tree.Root.AstNode as AstNode).Evaluate(thread);
             Console.Write(output);
 

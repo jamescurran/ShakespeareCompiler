@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Shakespeare.AST
+namespace Shakespeare.Ast
 {
     public class ShakespeareBaseAstNode : AstNode
     {
@@ -33,8 +33,6 @@ namespace Shakespeare.AST
         }
 
         protected bool Exist1 { get { return TreeNode.ChildNodes.Any(); } }
-        protected bool Exist2 { get { return TreeNode.ChildNodes.Count > 1; } }
-        protected bool Exist3 { get { return TreeNode.ChildNodes.Count > 2; } }
 
         protected string String1
         {
@@ -49,13 +47,6 @@ namespace Shakespeare.AST
             get
             {
                 return TreeNode.ChildNodes[1].ToString();
-            }
-        }
-        protected string String3
-        {
-            get
-            {
-                return TreeNode.ChildNodes[2].ToString();
             }
         }
 

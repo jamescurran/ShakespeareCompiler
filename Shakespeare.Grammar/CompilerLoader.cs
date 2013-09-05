@@ -1,5 +1,6 @@
 ﻿using Irony.Ast;
-using Shakespeare.AST;
+using Irony.Interpreter;
+using Shakespeare.Ast;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -17,27 +18,30 @@ namespace Shakespeare
             var asm = Assembly.LoadFrom(file);
             return new Compiler(asm);
         }
-
-
-
     }
 
 
     public class Compiler : IShakespeareCompiler
     {
-        Dictionary<String, Type> Mapper;
-        Assembly assembly;
+        readonly Dictionary<String, Type> mapper;
+        readonly Assembly assembly;
+
+        readonly IHasPrepareScope scoper;
 
         public Compiler(Assembly asm)
         {
             assembly = asm;
-            Mapper = asm.GetExportedTypes().ToDictionary(t => t.Name, t => t);
+            mapper = asm.GetExportedTypes().ToDictionary(t => t.Name, t => t);
+
+            var scoperType = mapper.Values.FirstOrDefault(t => typeof(IHasPrepareScope).IsAssignableFrom(t));
+            if (scoperType != null)
+                scoper = Activator.CreateInstance(scoperType) as IHasPrepareScope;
+
             ActHeaderNode = MakeCreator("ActHeaderNode");
-            ActNode = MakeCreator("ActNode");
             BinaryOperatorNode = MakeCreator("BinaryOperatorNode");
             CharacterDeclarationListNode = MakeCreator("CharacterDeclarationListNode");
             CharacterDeclarationNode = MakeCreator("CharacterDeclarationNode");
-            CharacterListNode = MakeCreator("CharacterListNode");
+            CharacterListNode = MakeCreator( "CharacterListNode");
             CommentNode = MakeCreator("CommentNode");
             ComparativeNode = MakeCreator("ComparativeNode");
             ComparisonNode = MakeCreator("ComparisonNode");
@@ -59,9 +63,7 @@ namespace Shakespeare
             QuestionNode = MakeCreator("QuestionNode");
             RecallNode = MakeCreator("RecallNode");
             RememberNode = MakeCreator("RememberNode");
-            SceneContentsNode = MakeCreator("SceneContentsNode");
             SceneHeaderNode = MakeCreator("SceneHeaderNode");
-            SceneNode = MakeCreator("SceneNode");
             SentenceNode = MakeCreator("SentenceNode");
             StatementNode = MakeCreator("StatementNode");
             TitleNode = MakeCreator("TitleNode");
@@ -73,7 +75,7 @@ namespace Shakespeare
         private AstNodeCreator MakeCreator(string name)
         {
             Type type;
-            if (Mapper.TryGetValue(name, out type))
+            if (mapper.TryGetValue(name, out type))
                 return MakeCreator(type);
             throw new ArgumentOutOfRangeException(name + "is not an exported type.");
         }
@@ -91,8 +93,13 @@ namespace Shakespeare
                 };
         }
 
+        public void PrepareScope(ScriptThread thread, object param)
+        {
+            if (scoper != null)
+                scoper.PrepareScope(thread, param);
+        }
+
         public AstNodeCreator ActHeaderNode   { get; private set; }
-        public AstNodeCreator ActNode   { get; private set; }
         public AstNodeCreator BinaryOperatorNode   { get; private set; }
         public AstNodeCreator CharacterDeclarationListNode   { get; private set; }
         public AstNodeCreator CharacterDeclarationNode   { get; private set; }
@@ -118,16 +125,13 @@ namespace Shakespeare
         public AstNodeCreator QuestionNode   { get; private set; }
         public AstNodeCreator RecallNode   { get; private set; }
         public AstNodeCreator RememberNode   { get; private set; }
-        public AstNodeCreator SceneContentsNode   { get; private set; }
         public AstNodeCreator SceneHeaderNode   { get; private set; }
-        public AstNodeCreator SceneNode   { get; private set; }
         public AstNodeCreator SentenceNode   { get; private set; }
         public AstNodeCreator StatementNode   { get; private set; }
         public AstNodeCreator TitleNode   { get; private set; }
         public AstNodeCreator UnaryOperatorNode   { get; private set; }
         public AstNodeCreator UnconditionalSentenceNode   { get; private set; }
         public AstNodeCreator ValueNode   { get; private set; }
-
 
     }
 
