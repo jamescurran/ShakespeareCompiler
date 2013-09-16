@@ -1,8 +1,27 @@
-﻿using Irony.Ast;
+﻿#region Copyright & License summary
+/*
+ Copyright 2013, James M. Curran, Novel Theory Software
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
+#endregion
+
+using Irony.Ast;
 using Irony.Interpreter;
 using Irony.Parsing;
 using Shakespeare.Text;
 using Shakespeare.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -96,7 +115,7 @@ namespace Shakespeare.Ast
             var tw = thread.tc().Writer;
             tw.WriteLine();
             tw.Write((Context.CurrentAct+":").PadRight(Constant.COMMENT_COLUMN));
-            tw.WriteLine(AstNode2);
+            tw.WriteLine(AstNode2.ToString(thread));
 
             return this;
         }
@@ -125,7 +144,7 @@ namespace Shakespeare.Ast
                 tw.WriteLine("\tenter_scene({0}, {1});", Location.Line, ch.AstNode.ToString().str2varname());
                 Context.ActiveCharacters.Add(ch.AstNode as CharacterNode);
             }
-            return this;
+            return base.ReallyDoEvaluate(thread);
         }
     }
 
@@ -167,7 +186,7 @@ namespace Shakespeare.Ast
         {
             var tw = thread.tc().Writer;
             tw.WriteLine();
-            tw.WriteLine("\tactivate_character({0}, {1});", Location.Line, AstNode1);
+            tw.WriteLine("\tactivate_character({0}, {1});", Location.Line, AstNode1.ToString(thread));
             AstNode2.Evaluate(thread);
             return this;
         }
@@ -182,12 +201,12 @@ namespace Shakespeare.Ast
             else
             {
                 var tw = thread.tc().Writer;
-                tw.WriteLine("\tif({0}) {{", AstNode1);
+                tw.WriteLine("\t\tif({0}) {{", AstNode1.ToString(thread));
                 AstNode2.Evaluate(thread);
                 tw.WriteLine("\t}");
             }
 
-            return this;
+            return base.ReallyDoEvaluate(thread);
         }
     }
 
@@ -218,7 +237,7 @@ namespace Shakespeare.Ast
             {
                     tw.WriteLine("\tint_input({0}, second_person);", Location.Line);
             }
-            return this;
+            return base.ReallyDoEvaluate(thread);
         }
     }
 
@@ -242,11 +261,11 @@ namespace Shakespeare.Ast
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
             var tw = thread.tc().Writer;
-            tw.WriteLine("\tcomp1 = {0};", AstNode2);
-            tw.WriteLine("\tcomp2 = {0};", AstNode4);
-            tw.WriteLine("\ttruth_flag = {0};", AstNode3);
+            tw.WriteLine("\tcomp1 = {0};", AstNode2.ToString(thread));
+            tw.WriteLine("\tcomp2 = {0};", AstNode4.ToString(thread));
+            tw.WriteLine("\ttruth_flag = {0};", AstNode3.ToString(thread));
 
-            return this;
+            return base.ReallyDoEvaluate(thread);
         }
     }
 
@@ -265,7 +284,7 @@ namespace Shakespeare.Ast
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
             var tw = thread.tc().Writer;
-            tw.WriteLine("\tpush({0}, second_person, {1});", Location.Line, AstNode2);
+            tw.WriteLine("\tpush({0}, second_person, {1});", Location.Line, AstNode2.ToString(thread));
 
             return this;
         }
@@ -281,19 +300,19 @@ namespace Shakespeare.Ast
                 if (AstNode2 is BeNode)
                 {
                     if (AstNode3 is ConstantNode)
-                        tw.WriteLine("\tassign({0}, second_person, {1});", Location.Line, AstNode3);
+                        tw.WriteLine("\tassign({0}, second_person, {1});", Location.Line, AstNode3.ToString(thread));
                     else    // SECOND_PERSON BE Equality Value StatementSymbol 
-                        tw.WriteLine("\tassign({0}, second_person, {1});", Location.Line, AstNode4);
+                        tw.WriteLine("\tassign({0}, second_person, {1});", Location.Line, AstNode4.ToString(thread));
   
                 }
                 else if (AstNode2 is UnarticulatedConstantNode)
                 {
-                    tw.WriteLine("\tassign({0}, second_person, {1});", Location.Line, AstNode2);
+                    tw.WriteLine("\tassign({0}, second_person, {1});", Location.Line, AstNode2.ToString(thread));
 
                 }
             }
 
-            return this;
+            return base.ReallyDoEvaluate(thread);
         }
 
     }
@@ -304,11 +323,9 @@ namespace Shakespeare.Ast
         {
             var tw = thread.tc().Writer;
             if (AstNode1 is NothingNode)
-                tw.Write("0");
+                return "0";
             else  // astNode1 is Article, FirstPErson, SecondPerson, thirdPerson
-                AstNode2.Evaluate(thread);
-
-            return this;
+                return AstNode2.Evaluate(thread);
         }
     }
 
@@ -326,7 +343,7 @@ namespace Shakespeare.Ast
         {
             var tw = thread.tc().Writer;
             Context.CurrentScene = Context.CurrentAct + "_" + scenenumber;
-            tw.WriteLine("{0}{1}", (Context.CurrentScene + ":").PadRight(Constant.COMMENT_COLUMN), AstNode2);
+            tw.WriteLine("{0}{1}", (Context.CurrentScene + ":").PadRight(Constant.COMMENT_COLUMN), AstNode2.ToString(thread));
             return this;
         }
     }
@@ -337,10 +354,9 @@ namespace Shakespeare.Ast
         {
             var tw = thread.tc().Writer;
             if (AstNode1 is NegativeNounNode)
-                tw.Write("(-1)");
+                return "(-1)";
             else // astnode1 is NegativeAdjective or astnode1 is neutralAdjective
-                tw.Write("2*{0}", AstNode2);
-            return this;
+                return string.Format("2*{0}", AstNode2.ToString(thread));
         }
     }
 
@@ -348,9 +364,7 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var tw = thread.tc().Writer;
-            tw.Write("({0})", AstNode1);
-            return this;
+            return AstNode1.Evaluate(thread);
         }
     }
 
@@ -387,20 +401,15 @@ namespace Shakespeare.Ast
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
             if (AstNode1 is NonnegatedComparisonNode)
-                AstNode1.Evaluate(thread);
-            //                tw.WriteLine(AstNode1);
+                return AstNode1.Evaluate(thread);
             else
-            {
-                var tw = thread.tc().Writer;
-                tw.WriteLine("!{0}", AstNode2);
-            }
-            return this;
+                return string.Format("!{0}", AstNode2.Evaluate(thread) as string);
         }
     }
 
     public class ConditionalNode :ShakespeareBaseAstNode
     {
-        public override string ToString()
+        protected override object ReallyDoEvaluate(ScriptThread thread)
         {
             if (Child1.Term.Name == "if so")
                 return "truth_flag";
@@ -415,24 +424,21 @@ namespace Shakespeare.Ast
         {
             var tw = thread.tc().Writer;
             if (AstNode1 is CharacterNode)
-            {
-                tw.Write(AstNode1);
-                tw.Write("->value");
-            }
+				return (AstNode1.Evaluate(thread) as string) +"->value";
             else if (AstNode1 is ConstantNode)
-                AstNode1.Evaluate(thread);
+                return AstNode1.Evaluate(thread);
             else if (AstNode1 is PronounNode)
             {
-                tw.Write("value_of({0},{1})", Location.Line, AstNode1);
+                return String.Format("value_of({0},{1})", Location.Line, AstNode1.Evaluate(thread) as string);
             }
             else if (AstNode1 is BinaryOperatorNode)
             {
-                tw.Write(AstNode1.ToString(),Location.Line,  AstNode2, AstNode3);
+                return string.Format(AstNode1.ToString(), Location.Line, AstNode2.Evaluate(thread) as string, AstNode3.Evaluate(thread) as string);
             }
             else if (AstNode1 is UnaryOperatorNode)
             {
                 AstNode1.Evaluate(thread);
-                tw.Write((AstNode1 as UnaryOperatorNode).FormatString, AstNode2);
+                return string.Format((AstNode1 as UnaryOperatorNode).FormatString, AstNode2.Evaluate(thread) as string);
             }
             else
             {
@@ -445,7 +451,7 @@ namespace Shakespeare.Ast
 
     public class PronounNode : ShakespeareBaseAstNode
     {
-        public override string ToString()
+        protected override object ReallyDoEvaluate(ScriptThread thread)
         {
             if (AstNode1 is FirstPersonNode || AstNode1 is FirstPersonReflexiveNode)
                 return "first_person";
@@ -460,14 +466,10 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var tw = thread.tc().Writer;
             if (AstNode1 is PositiveNounNode)
-                tw.Write("1");
+                return ("1");
             else
-            {
-                tw.Write("2*{0}", AstNode2);
-            }
-            return this;
+                return string.Format("2*{0}", AstNode2.Evaluate(thread) as string);
         }
     }
 
@@ -475,9 +477,7 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var tw = thread.tc().Writer;
-            tw.Write("comp1 == comp2");
-            return this;
+            return "Comp1 == Comp2";
         }
     }
 
@@ -485,12 +485,10 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var tw = thread.tc().Writer;
             if (AstNode1 is NegativeComparativeNode)
-                tw.Write("comp1 < comp2");
+                return ("comp1 < comp2");
             else  // PositiveComparativeNode
-                tw.Write("comp1 > comp2");
-            return this;
+                return ("comp1 > comp2");
         }
     }
 
@@ -499,11 +497,9 @@ namespace Shakespeare.Ast
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
             if (AstNode1 is NegativeComparativeTermNode)
-                AstNode1.Evaluate(thread);
+                return AstNode1.Evaluate(thread);
             else
-                AstNode2.Evaluate(thread);
-
-            return this;
+                return AstNode2.Evaluate(thread);
         }
     }
 
@@ -515,15 +511,12 @@ namespace Shakespeare.Ast
             var strTerm = term != null ? term.ToString() : null;
             if (strTerm == "more" || strTerm == "less")
             {
-                AstNode1.Evaluate(thread);
-                var tw = thread.tc().Writer;
-                tw.Write(' ');
-                AstNode2.Evaluate(thread);
+                var st1 = AstNode1.Evaluate(thread) as string;
+                var st2 = AstNode2.Evaluate(thread) as string;
+				return st1 + ' ' + st2;
             }
             else
-                AstNode1.Evaluate(thread);
-
-            return this;
+                return AstNode1.Evaluate(thread);
         }
     }
 

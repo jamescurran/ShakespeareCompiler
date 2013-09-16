@@ -1,10 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#region Copyright & License summary
+/*
+ Copyright 2013, James M. Curran, Novel Theory Software
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
+#endregion
+
 using Irony.Ast;
 using Irony.Interpreter;
 using Irony.Parsing;
 using Shakespeare.Utility;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using TriAxis.RunSharp;
 
 namespace Shakespeare.Ast
@@ -35,6 +53,7 @@ namespace Shakespeare.Ast
                 return obj as AssemblyGen;
             }
 
+            // We should never reach here, and the AssemblyGen is created by the ScopePreparer
             var ag = new AssemblyGen(@"C:\Users\User\Projects\Shakespeare\Executables\Debug\output.exe", true);
             context.Values.Add(RunSharpContext.Key, ag);
             return ag;
@@ -52,12 +71,20 @@ namespace Shakespeare.Ast
             throw new InvalidOperationException("RunSharpContext not defined.");
         }
 
+        //public static CodeGen At(this CodeGen cg, SourceLocation location)
+        //{
+        //    cg.At(location.Line+1, location.Column);
+        //    return cg;
+        //}
+        public static CodeGen At(this CodeGen cg, SourceSpan span)
+        {
+            return cg.At(span.Location.Line + 1, span.Location.Column, span.Location.Line + 1, span.Location.Column + span.Length);
+        }
     }
 
 
     public class PlayNode : ShakespeareBaseAstNode
     {
-
         protected override object ReallyDoEvaluate(Irony.Interpreter.ScriptThread thread)
         {
             var rs = thread.rs();
@@ -78,6 +105,7 @@ namespace Shakespeare.Ast
                     CodeGen action = scriptClass.Public.Method(typeof(void), "Action");
                     {
                         rs.Action = action;
+                        action.At(Span);
                         AstNode1.Evaluate(thread);
                         var cdl = AstNode2 as CharacterDeclarationListNode;
                         foreach (var ch in cdl.Characters)
@@ -95,7 +123,7 @@ namespace Shakespeare.Ast
                     Main.Invoke(script, "Action");
                 }
             }
-            ag.Save();
+            ag.Save();  
             return thread;
         }
         public override string ToString()
@@ -131,7 +159,8 @@ namespace Shakespeare.Ast
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
             Context.CurrentAct = actnumber;
-            thread.rs().Action.Label(actnumber);           
+            thread.rs().Action.At(Span).Label(actnumber);
+
 
             return base.ReallyDoEvaluate(thread);
         }
@@ -158,7 +187,7 @@ namespace Shakespeare.Ast
             {
                 var name = ch.AstNode.ToString();
                 var person = thread.rs().Cast[name];
-                action.Invoke(action.Base(), "EnterScene", Location.Line, person);
+                action.At(Span).Invoke(action.Base(), "EnterScene", Location.Line, person);
                 Context.ActiveCharacters.Add(ch.AstNode as CharacterNode);
             }
             return base.ReallyDoEvaluate(thread);
@@ -169,7 +198,7 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var action = thread.rs().Action;
+            var action = thread.rs().Action.At(Span);
             var charList = new List<CharacterNode>();
             var cast = thread.rs().Cast;
 
@@ -206,7 +235,7 @@ namespace Shakespeare.Ast
         {
             var action = thread.rs().Action;
             var person = thread.rs().Cast[AstNode1.ToString()];
-            action.Invoke(action.Base(),"Activate",  Location.Line, person);
+            action.At(Span).Invoke(action.Base(),"Activate",  Location.Line, person);
             AstNode2.Evaluate(thread);
             return base.ReallyDoEvaluate(thread);
         }
@@ -220,7 +249,7 @@ namespace Shakespeare.Ast
                 AstNode1.Evaluate(thread);
             else
             {
-                var action = thread.rs().Action;
+                var action = thread.rs().Action.At(Span);
                 action.If(AstNode1.Evaluate(thread) as Operand);
                 AstNode2.Evaluate(thread);
                 action.End();
@@ -237,7 +266,7 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var action = thread.rs().Action;
+            var action = thread.rs().Action.At(Span);
             if (AstNode1 is OpenYourNode)
             {
                 if (String2 == "heart (Keyword)")
@@ -267,12 +296,11 @@ namespace Shakespeare.Ast
         {
             string label;
             if (AstNode2 is SceneRomanNode)
-                label = Context.CurrentAct + "_" +  AstNode2.ToString().str2varname();
+                label = Context.CurrentAct + "_" + AstNode2.ToString(thread).str2varname();
             else
-                label = AstNode2.ToString().str2varname();
+                label = AstNode2.ToString(thread).str2varname();
 
-            var action = thread.rs().Action;
-            action.Goto(label);
+            thread.rs().Action.At(Span).Goto(label);
 
             return base.ReallyDoEvaluate(thread);
         }
@@ -282,7 +310,7 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var action = thread.rs().Action;
+            var action = thread.rs().Action.At(Span);
             action.Assign(action.Base().Property("Comp1"), AstNode2.Evaluate(thread) as Operand);
             action.Assign(action.Base().Property("Comp2"), AstNode4.Evaluate(thread) as Operand);
             action.Assign(action.Base().Property("TruthFlag"), AstNode3.Evaluate(thread) as Operand);
@@ -295,7 +323,7 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var action = thread.rs().Action;
+            var action = thread.rs().Action.At(Span);
             action.Invoke(action.Base(), "Pop",Location.Line);
             return base.ReallyDoEvaluate(thread);
         }
@@ -305,7 +333,7 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var action = thread.rs().Action;
+            var action = thread.rs().Action.At(Span);
             action.Invoke(action.Base(), "Push", Location.Line, AstNode2.Evaluate(thread) as Operand);
             return base.ReallyDoEvaluate(thread);
         }
@@ -317,7 +345,7 @@ namespace Shakespeare.Ast
         {
             if (AstNode1 is SecondPersonNode)
             {
-                var action = thread.rs().Action;
+                var action = thread.rs().Action.At(Span);
                 if (AstNode2 is BeNode)
                 {
                     if (AstNode3 is ConstantNode)
@@ -355,15 +383,14 @@ namespace Shakespeare.Ast
         public override void Init(AstContext context, ParseTreeNode treeNode)
         {
             base.Init(context, treeNode);
-            scenenumber = String1.str2varname();
+            scenenumber = this.TreeNode.ChildNodes[0].ChildNodes[0].Token.ValueString.str2varname();
         }
 
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
             Context.CurrentScene = Context.CurrentAct + "_" + scenenumber;
 
-            var action = thread.rs().Action;
-            action.Label(Context.CurrentScene);
+            thread.rs().Action.At(Span).Label(Context.CurrentScene);
             return base.ReallyDoEvaluate(thread);
         }
     }
@@ -399,17 +426,16 @@ namespace Shakespeare.Ast
 
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var action = thread.rs().Action;
-            var name = AstNode1.ToString();
-            var person  = action.Local(typeof(Shakespeare.Support.Character), action.Base().Invoke("InitializeCharacter", Location.Line, name));
+            var action = thread.rs().Action.At(Span);
+            var name = AstNode1.ToString(thread);
+            var person  = action.Local(typeof(Shakespeare.Support.Character), action.Base().Invoke("InitializeCharacter", Location.Line, name), name);
+            //var xx = action.Local(typeof(int), this.GetHashCode(), name + this.GetHashCode().ToString());
             thread.rs().Cast.Add(name, person);
             return base.ReallyDoEvaluate(thread);
         }
     }
 
-    public class CommentNode :ShakespeareBaseAstNode
-    {
-    }
+    public class CommentNode :ShakespeareBaseAstNode     {    }
 
     public class ActNode : TwoPartNode { }
 
@@ -428,7 +454,7 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var action = thread.rs().Action;
+            var action = thread.rs().Action.At(Span);
             if (Child1.Term.Name == "if so")
                 return action.Base().Property("TruthFlag");
             else// if not
@@ -440,7 +466,7 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var action = thread.rs().Action;
+            var action = thread.rs().Action.At(Span);
             var cast = thread.rs().Cast;
             if (AstNode1 is CharacterNode)
             {
@@ -487,7 +513,7 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var action = thread.rs().Action;
+            var action = thread.rs().Action.At(Span);
 
             if (AstNode1 is FirstPersonNode || AstNode1 is FirstPersonReflexiveNode)
                 return  action.Base().Property("FirstPerson");
@@ -518,7 +544,7 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var action = thread.rs().Action;
+            var action = thread.rs().Action.At(Span);
             var cond = action.Base().Property("Comp1") == action.Base().Property("Comp2");
             return cond;
         }
@@ -528,7 +554,7 @@ namespace Shakespeare.Ast
     {
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            var action = thread.rs().Action;
+            var action = thread.rs().Action.At(Span);
             if (AstNode1 is NegativeComparativeNode)
                 return action.Base().Property("Comp1") < action.Base().Property("Comp2");
             else  // PositiveComparativeNode
@@ -580,7 +606,7 @@ namespace Shakespeare.Ast
 
         protected override object ReallyDoEvaluate(ScriptThread thread)
         {
-            return functionMap[String1];
+            return functionMap[Child1.Term.Name];
         }
     }
 }

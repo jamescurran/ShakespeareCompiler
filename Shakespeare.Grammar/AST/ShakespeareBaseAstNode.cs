@@ -1,4 +1,5 @@
 ﻿using Irony.Ast;
+using Irony.Interpreter;
 using Irony.Interpreter.Ast;
 using Irony.Parsing;
 using System;
@@ -87,6 +88,17 @@ namespace Shakespeare.Ast
             thread.CurrentNode = Parent; //standard epilog
 
             return obj;
+        }
+
+        [Obsolete("Do not call ToString().  Use ToString(thread) instead.")]
+        public override string ToString()
+        {
+            throw new NotImplementedException("Do not call ToString().  Use ToString(thread) instead.");
+        }
+
+        public string ToString(ScriptThread thread)
+        {
+            return this.DoEvaluate(thread) as string;
         }
     }
 }
