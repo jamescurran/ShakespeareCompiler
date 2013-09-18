@@ -58,7 +58,16 @@ namespace Shakespeare.Support
 
         public string DebugStr
         {
-            get { return string.Format("{0}/{1}{2}", Name, Value, OnStage ? "/(On Stage)" : ""); }
+            get 
+            {
+                var chr = (char) Value;
+                var strChar = "";
+                if (Char.IsSymbol(chr) || Char.IsLetterOrDigit(chr))
+                {
+                    strChar = String.Format(" : '{0}'", chr);
+                }
+                return string.Format("{0}/{1}{2}{3}", Name, Value, strChar, OnStage ? "/(On Stage)" : ""); 
+            }
         }
 
         internal void Pop(int lineno)

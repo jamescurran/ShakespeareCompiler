@@ -65,7 +65,7 @@ namespace ShakesCL
 
             comp.PrepareScope(thread, param);
             var output = (tree.Root.AstNode as AstNode).Evaluate(thread);
-            Console.Write(output);
+            Console.WriteLine(output);
 
         }
     }

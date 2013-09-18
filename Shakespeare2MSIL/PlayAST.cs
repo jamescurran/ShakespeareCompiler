@@ -39,7 +39,6 @@ namespace Shakespeare.Ast
         {
             Cast = new Dictionary<string, Operand>();
         }
-
     }
 
 
@@ -71,11 +70,6 @@ namespace Shakespeare.Ast
             throw new InvalidOperationException("RunSharpContext not defined.");
         }
 
-        //public static CodeGen At(this CodeGen cg, SourceLocation location)
-        //{
-        //    cg.At(location.Line+1, location.Column);
-        //    return cg;
-        //}
         public static CodeGen At(this CodeGen cg, SourceSpan span)
         {
             return cg.At(span.Location.Line + 1, span.Location.Column, span.Location.Line + 1, span.Location.Column + span.Length);
@@ -102,7 +96,7 @@ namespace Shakespeare.Ast
                     { 
                     }
 
-                    CodeGen action = scriptClass.Public.Method(typeof(void), "Action");
+                    CodeGen action = scriptClass.Public.Void("Action");
                     {
                         rs.Action = action;
                         action.At(Span);
@@ -117,14 +111,15 @@ namespace Shakespeare.Ast
                 scriptClass.Complete();
 
                 TypeGen MyClass = ag.Public.Class("Program");
-                CodeGen Main = MyClass.Public.Static.Method(typeof(void), "Main").Parameter(typeof(string[]), "args");
+                CodeGen Main = MyClass.Public.Static.Void("Main").Parameter<string[]>("args");
                 {
                     var script = Main.Local(Exp.New(scriptClass.GetCompletedType()));
                     Main.Invoke(script, "Action");
                 }
             }
-            ag.Save();  
-            return thread;
+            ag.Save();
+
+            return ag.GetAssembly().GetName().Name;
         }
         public override string ToString()
         {
@@ -428,9 +423,8 @@ namespace Shakespeare.Ast
         {
             var action = thread.rs().Action.At(Span);
             var name = AstNode1.ToString(thread);
-            var person  = action.Local(typeof(Shakespeare.Support.Character), action.Base().Invoke("InitializeCharacter", Location.Line, name), name);
-            //var xx = action.Local(typeof(int), this.GetHashCode(), name + this.GetHashCode().ToString());
-            thread.rs().Cast.Add(name, person);
+            action[name] = action.Base().Invoke("InitializeCharacter", Location.Line, name);
+            thread.rs().Cast.Add(name, action[name]);
             return base.ReallyDoEvaluate(thread);
         }
     }
